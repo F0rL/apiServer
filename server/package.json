@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "_moduleAliases": {
+    "@root": ".",
+    "@app": "app",
+    "@api": "app/api"
+  },
+  "dependencies": {
+    "@koa/cors": "2",
+    "cross-env": "^6.0.3",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "module-alias": "^2.2.2",
+    "nodemon": "^1.19.4",
+    "require-directory": "^2.1.1"
+  }
+}
