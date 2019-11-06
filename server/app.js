@@ -8,6 +8,7 @@ const app = new koa()
 
 app.use(bodyParser())
 app.use(cors())
+app.proxy=true
 
 // init router
 InitManager.initCore(app)
