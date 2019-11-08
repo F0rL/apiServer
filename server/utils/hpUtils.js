@@ -1,22 +1,22 @@
 const axios = require('axios')
 
-const conf = require('@app/config/config')
+const { gaode } = require('@app/config/config')
 
 async function getIpInfo(ip) {
-  return axios.get(conf.gaodeIpInfo, {
+  return axios.get(gaode.gaodeIpInfo, {
     params: {
       ip: ip,
       output: 'JSON',
-      key: conf.gaodeKey
+      key: gaode.gaodeKey
     }
   })
 }
 
 async function getWether(adcode, extensions = 'all') {
-  return axios.get(conf.gaodeWether, {
+  return axios.get(gaode.gaodeWether, {
     params: {
       city: adcode,
-      key: conf.gaodeKey,
+      key: gaode.gaodeKey,
       extensions,
       output: 'JSON'
     }

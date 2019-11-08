@@ -1,5 +1,5 @@
 const Router = require('koa-router')
-const { imgUrl } = require('@app/model/home/helper')
+const { imgUrl } = require('@app/tools/home/helper')
 const { devClientIp } = require('@app/config/domain')
 const { getIpInfo, getWether, getBing } = require('@root/utils/hpUtils')
 const { Success } = require('@root/core/httpCode')
