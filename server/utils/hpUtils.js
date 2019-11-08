@@ -23,7 +23,41 @@ async function getWether(adcode, extensions = 'all') {
   })
 }
 
+// 代理到bing
+async function getBing(idx, n) {
+  const res = await axios.get(
+    'http://proxy.forl.fun/bing/HPImageArchive.aspx',
+    {
+      params: {
+        format: 'js',
+        idx,
+        n,
+        mkt: 'zh-CN'
+      }
+    }
+  )
+
+  const data = res.data.images
+  let newArr = []
+  const baseUrl = `https://cn.bing.com`
+  data.forEach(item => {
+    let { startdate, enddate, copyright, hsh, url, urlbase } = item
+    url = baseUrl + url
+    urlbase = baseUrl + urlbase
+    newArr.push({
+      startdate,
+      enddate,
+      copyright,
+      hsh,
+      url,
+      urlbase
+    })
+  })
+  return newArr
+}
+
 module.exports = {
   getIpInfo,
-  getWether
+  getWether,
+  getBing
 }

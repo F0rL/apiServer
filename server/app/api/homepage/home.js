@@ -1,25 +1,22 @@
 const Router = require('koa-router')
-const { hpStaticDomain } = require('@app/config/hpConfig')
+const { imgUrl } = require('@app/model/home/helper')
 const { devClientIp } = require('@app/config/domain')
-const { getIpInfo, getWether } = require('@root/utils/hpUtils')
+const { getIpInfo, getWether, getBing } = require('@root/utils/hpUtils')
+const { Success } = require('@root/core/httpCode')
 
 const router = new Router({
   prefix: '/homepage/home'
 })
 
 router.get('/bg', async (ctx, next) => {
-  ctx.body = {
-    code: 200,
-    imgUrl: [
-      {
-        id: 1,
-        url: `${hpStaticDomain}/bg/BG_1.jpg`
-      },
-      {
-        id: 2,
-        url: `${hpStaticDomain}/bg/BG_2.jpg`
-      }
-    ]
+  let idx = 0,
+    n = 6
+  const bingUrl = await getBing(idx, n)
+  if (bingUrl && bingUrl.length === n) {
+    ctx.body = {
+      imgUrl,
+      bingUrl
+    }
   }
 })
 
@@ -30,6 +27,14 @@ router.get('/getwether', async (ctx, next) => {
   const wetherInfo = await getWether(ipInfo.data.adcode)
   ctx.body = {
     ...wetherInfo.data
+  }
+})
+
+router.get('/morebg', async (ctx, next) => {
+  const { idx, n } = ctx.query
+  const bingUrl = await getBing(idx, n)
+  ctx.body = {
+    bingUrl
   }
 })
 
