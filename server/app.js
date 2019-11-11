@@ -16,7 +16,7 @@ app.use(catchError)
 // init router
 InitManager.initCore(app)
 
-const port  = process.env.NODE_ENV === 'development' ? 3000 : 3003
+const port  = process.env.NODE_ENV === 'development' ? 3000 : 3000
 app.listen(3000, () => {
   console.log(`server is running on port ${port}`)
 })
