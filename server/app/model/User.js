@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const { Sequelize, Model } = require('sequelize')
 
 const { sequelize } = require('@root/core/db')
-const { Forbbiden } = require('../../core/httpCode')
+const { Forbbiden, ParameterException } = require('../../core/httpCode')
 
 class User extends Model {
   static async verifyEmailOrPhone(account, plainPassword, type = 101) {
@@ -11,7 +11,7 @@ class User extends Model {
       102: 'phone'
     }
     if (!typeObj[type]) {
-      throw new Forbbiden('登录方式错误')
+      throw new ParameterException('登录方式错误')
     }
     const user = await User.findOne({
       where: {
@@ -19,11 +19,11 @@ class User extends Model {
       }
     })
     if (!user) {
-      throw new Forbbiden('用户不存在')
+      throw new ParameterException('用户不存在')
     }
     const correct = bcrypt.compareSync(plainPassword, user.password)
     if (!correct) {
-      throw new Forbbiden('密码错误')
+      throw new ParameterException('密码错误')
     }
     return user
   }
