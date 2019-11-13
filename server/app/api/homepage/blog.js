@@ -4,20 +4,23 @@ const { Blog } = require('@app/model/Blog')
 const { Auth } = require('@root/middleware/auth')
 const { Success, AuthFailed } = require('@root/core/httpCode')
 const { ParameterException } = require('@root/core/httpCode')
+const BlogController = require('@app/controller/blog')
+const UserController = require('@app/controller/user')
 
 const router = new Router({
-  prefix: '/blog'
+  prefix: '/homepage/blog'
 })
 
 // POST
 // 新增草稿
-// 参数：token=>uid
+// 参数：token=>uid 可选publishId
 router.post('/drafts/new', new Auth().u, async (ctx, next) => {
   const uid = ctx.auth.uid
-  console.log(uid)
+  const publishId = ctx.request.body.publishId || null
   const blog = {
     authorId: uid,
-    status: 1 //未发布
+    status: 1, //未发布
+    publishId
   }
   const msg = await Blog.create(blog)
   ctx.body = {
@@ -35,7 +38,6 @@ router.post('/drafts/update', new Auth().u, async (ctx, next) => {
   const title = v.title || '空白标题'
   const content = v.content || ''
   const blogId = v.blogId || 0
-  console.log(uid)
   const msg = await Blog.update(
     {
       title,
@@ -90,15 +92,17 @@ router.post('/publish', new Auth().u, async (ctx, next) => {
 // GET
 // 获取所有已发布文章列表
 router.get('/bloglist', async (ctx, next) => {
-  const blogList = await Blog.findAll({
-    where: {
-      status: 2
-    },
-    order: [['updated_at', 'DESC']]
-  })
+  const blogList = await BlogController.getBlogList()
+  const addNickNameList = []
+  for(value of blogList) {
+    const user = await UserController.getUserById(value.authorId)
+    // 只获取里面的JSON数据
+    value = value.get({plain: true})
+    addNickNameList.push({...value, nickname: user.nickname })
+  }
   ctx.body = {
     code: 200,
-    blogList
+    blogList: addNickNameList
   }
 })
 

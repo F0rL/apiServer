@@ -24,6 +24,7 @@ Blog.init(
     status: {
       type: Sequelize.INTEGER
     },
+    publishId: Sequelize.INTEGER,
     keywords: {
       type: Sequelize.STRING(128)
     }
