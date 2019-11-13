@@ -5,7 +5,7 @@ const { generateToken } = require('@root/utils/setToken')
 const { Auth } = require('@root/middleware/auth')
 
 const router = new Router({
-  prefix: '/user'
+  prefix: '/homepage/user'
 })
 
 // POST
@@ -18,6 +18,18 @@ router.post('/register', async (ctx, next) => {
     email: v.email,
     password: v.password,
     nickname: v.nickname
+  }
+  const findUser = await User.findOne({
+    where: {
+      email: user.email
+    }
+  })
+  if (findUser.id) {
+    ctx.body = {
+      code: 404,
+      msg: '账号已经注册'
+    }
+    return
   }
   const msg = await User.create(user)
   const token = generateToken(msg.id, Auth.USER)
@@ -35,10 +47,11 @@ router.post('/register', async (ctx, next) => {
 // 参数 account(email, mobile) secret type
 router.post('/login', async (ctx, next) => {
   const v = ctx.request.body
+  console.log(v);
   const user = await User.verifyEmailOrPhone(
     v.account,
     v.password,
-    parseInt(v.type)
+    // parseInt(v.type)
   )
   const userInfo = await User.findOne({
     where: {

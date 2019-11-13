@@ -6,7 +6,8 @@ class UserController {
     const result = await User.findOne({
       where: {
         id: uid
-      }
+      },
+      attributes: { exclude: ['created_at', 'deleted_at', 'password'] },
     })
     return result
   }
