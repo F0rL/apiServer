@@ -8,7 +8,7 @@ const config = {
   },
   security: {
     secretKey: 'kumaloveslife',
-    expiresIn: 60*60*24
+    expiresIn: 60*60*24*3
   }
 }
 
