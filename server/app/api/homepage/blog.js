@@ -2,8 +2,7 @@ const Router = require('koa-router')
 
 const { Blog } = require('@app/model/Blog')
 const { Auth } = require('@root/middleware/auth')
-const { Success, AuthFailed } = require('@root/core/httpCode')
-const { ParameterException } = require('@root/core/httpCode')
+const { Success, AuthFailed, NotFound } = require('@root/core/httpCode')
 const BlogController = require('@app/controller/blog')
 const UserController = require('@app/controller/user')
 
@@ -52,7 +51,7 @@ router.post('/drafts/update', new Auth().u, async (ctx, next) => {
   )
   // 更新不成功
   if (msg[0] === 0) {
-    throw new Success('未找到对应文章')
+    throw new NotFound('未找到对应文章')
   }
   ctx.body = {
     code: 200,
@@ -147,15 +146,18 @@ router.get('/drafts/list', new Auth().u, async (ctx, next) => {
 // 参数 blogId
 router.get('/artical', async (ctx, next) => {
   const blogId = ctx.request.query.blogId
-  const content = await Blog.findOne({
+  const msg = await Blog.findOne({
     where: {
       id: blogId,
       status: 2
     }
   })
-  if (!content) {
-    throw new Success('未找到指定文章')
+  if (!msg) {
+    throw new NotFound('未找到指定文章')
   }
+  const user = await UserController.getUserById(msg.authorId)
+  const content = msg.get({plain: true})
+  content.nickname = user.nickname
   ctx.body = {
     code: 200,
     content
@@ -176,7 +178,7 @@ router.get('/drafts', new Auth().u, async (ctx, next) => {
     }
   })
   if (!content) {
-    throw new Success('未找到指定文章')
+    throw new NotFound('未找到指定文章')
   }
   ctx.body = {
     code: 200,
