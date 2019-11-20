@@ -36,7 +36,7 @@ router.post('/drafts/update', new Auth().u, async (ctx, next) => {
   const v = ctx.request.body
   const title = v.title || '空白标题'
   const content = v.content || ''
-  const blogId = v.blogId || 0
+  const blogId = v.blogId || -1
   const msg = await Blog.update(
     {
       title,
@@ -180,9 +180,11 @@ router.get('/drafts', new Auth().u, async (ctx, next) => {
   if (!content) {
     throw new NotFound('未找到指定文章')
   }
+  const msg = content.get({plain: true})
+  console.log(content)
   ctx.body = {
     code: 200,
-    content
+    ...msg
   }
 })
 
@@ -194,7 +196,7 @@ router.post('/delete', new Auth().u, async (ctx, next) => {
   const uid = ctx.auth.uid
   const blogId = v.blogId
   const blog = await Blog.destroy({
-    force: false,
+    force: true,
     where: {
       author_id: uid,
       id: blogId
