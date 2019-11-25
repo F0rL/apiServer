@@ -1,5 +1,6 @@
 const Router = require('koa-router')
 
+const { Op } = require('sequelize')
 const { Blog } = require('@app/model/Blog')
 const { Auth } = require('@root/middleware/auth')
 const { Success, AuthFailed, NotFound } = require('@root/core/httpCode')
@@ -16,10 +17,14 @@ const router = new Router({
 router.post('/drafts/new', new Auth().u, async (ctx, next) => {
   const uid = ctx.auth.uid
   const publishId = ctx.request.body.publishId || null
+  const title = ctx.request.body.title || null
+  const content = ctx.request.body.content || null
   const blog = {
     authorId: uid,
     status: 1, //未发布
-    publishId
+    publishId,
+    title,
+    content
   }
   const msg = await Blog.create(blog)
   ctx.body = {
@@ -73,18 +78,28 @@ router.post('/publish', new Auth().u, async (ctx, next) => {
     authorId: uid,
     status: 2 //已发布
   }
+  const publishMsg = await Blog.findOne({
+    where: {
+      id: draftId,
+      status: 1
+    }
+  })
+  const publishId = publishMsg.get({ plain: true }).publishId
   const msg = await Blog.create(blog)
   const del = await Blog.destroy({
-    force: false,
+    force: true,
     where: {
       authorId: uid,
-      id: draftId
+      [Op.or]: [
+        {id: publishId},
+        {id: draftId}
+      ]
     }
   })
   ctx.body = {
     code: 200,
     msg,
-    del
+    del,
   }
 })
 
@@ -93,11 +108,11 @@ router.post('/publish', new Auth().u, async (ctx, next) => {
 router.get('/bloglist', async (ctx, next) => {
   const blogList = await BlogController.getBlogList()
   const addNickNameList = []
-  for(value of blogList) {
+  for (value of blogList) {
     const user = await UserController.getUserById(value.authorId)
     // 只获取里面的JSON数据
-    value = value.get({plain: true})
-    addNickNameList.push({...value, nickname: user.nickname })
+    value = value.get({ plain: true })
+    addNickNameList.push({ ...value, nickname: user.nickname })
   }
   ctx.body = {
     code: 200,
@@ -146,21 +161,21 @@ router.get('/drafts/list', new Auth().u, async (ctx, next) => {
 // 参数 blogId
 router.get('/artical', async (ctx, next) => {
   const blogId = ctx.request.query.blogId
-  const msg = await Blog.findOne({
+  const content = await Blog.findOne({
     where: {
       id: blogId,
       status: 2
     }
   })
-  if (!msg) {
+  if (!content) {
     throw new NotFound('未找到指定文章')
   }
-  const user = await UserController.getUserById(msg.authorId)
-  const content = msg.get({plain: true})
+  const user = await UserController.getUserById(content.authorId)
+  const msg = content.get({ plain: true })
   content.nickname = user.nickname
   ctx.body = {
     code: 200,
-    content
+    ...msg
   }
 })
 
@@ -180,8 +195,7 @@ router.get('/drafts', new Auth().u, async (ctx, next) => {
   if (!content) {
     throw new NotFound('未找到指定文章')
   }
-  const msg = content.get({plain: true})
-  console.log(content)
+  const msg = content.get({ plain: true })
   ctx.body = {
     code: 200,
     ...msg
