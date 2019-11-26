@@ -13,7 +13,6 @@ const router = new Router({
 // 必须账号密码昵称
 router.post('/register', async (ctx, next) => {
   const v = ctx.request.body
-  console.log(v)
   const user = {
     email: v.email,
     password: v.password,
@@ -24,7 +23,7 @@ router.post('/register', async (ctx, next) => {
       email: user.email
     }
   })
-  if (findUser.id) {
+  if (findUser && findUser.id) {
     ctx.body = {
       code: 404,
       msg: '账号已经注册'
